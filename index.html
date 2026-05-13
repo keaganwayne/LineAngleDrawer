@@ -44,11 +44,12 @@
       margin: 0 auto;
       padding: 24px;
       display: grid;
-      grid-template-columns: 390px minmax(0, 1fr);
+      grid-template-columns: 340px minmax(0, 1fr);
+      grid-template-rows: auto minmax(0, 1fr);
       gap: 22px;
     }
 
-    .sidebar, .stage-card {
+    .app-header, .sidebar, .stage-card {
       background: var(--panel);
       backdrop-filter: blur(18px);
       border: 1px solid rgba(255,255,255,.7);
@@ -56,10 +57,19 @@
       box-shadow: var(--shadow);
     }
 
+    .app-header {
+      grid-column: 1 / -1;
+      padding: 14px 18px;
+      display: grid;
+      grid-template-columns: minmax(210px, .9fr) minmax(0, 2.2fr);
+      gap: 18px;
+      align-items: center;
+    }
+
     .sidebar {
       padding: 18px;
       align-self: start;
-      max-height: calc(100vh - 48px);
+      max-height: calc(100vh - 126px);
       overflow: auto;
     }
 
@@ -67,9 +77,8 @@
       display: flex;
       align-items: center;
       gap: 13px;
-      padding: 6px 4px 18px;
-      border-bottom: 1px solid rgba(31,41,51,.1);
-      margin-bottom: 16px;
+      padding: 0;
+      margin: 0;
     }
 
     .logo {
@@ -88,16 +97,29 @@
     .logo svg { width: 34px; height: 34px; }
 
     .brand h1 {
-      font-size: 21px;
+      font-size: 18px;
       line-height: 1.1;
       margin: 0;
-      letter-spacing: -.03em;
     }
 
     .brand p {
       margin: 4px 0 0;
       color: var(--muted);
       font-size: 13px;
+    }
+
+    .project-bar {
+      display: grid;
+      grid-template-columns: 1fr .65fr 1.15fr .9fr;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .mode-note {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
     }
 
     .section {
@@ -211,6 +233,26 @@
     }
     .swatch.selected { outline: 3px solid #26384c; transform: scale(1.05); }
 
+    .current-colour {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .current-colour::before {
+      content: "";
+      width: 14px;
+      height: 14px;
+      border-radius: 5px;
+      background: var(--selected-colour, #1f2933);
+      border: 1px solid rgba(31,41,51,.18);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.45);
+    }
+
     .progress-wrap {
       margin-top: 10px;
       background: rgba(31,41,51,.08);
@@ -279,8 +321,7 @@
 
     .stage-title h2 {
       margin: 0;
-      font-size: 24px;
-      letter-spacing: -.04em;
+      font-size: 18px;
     }
     .stage-title p {
       margin: 5px 0 0;
@@ -297,8 +338,8 @@
 
     .paper-shell {
       width: 100%;
-      height: calc(100vh - 150px);
-      min-height: 560px;
+      height: calc(100vh - 185px);
+      min-height: 620px;
       display: grid;
       place-items: center;
       background:
@@ -322,6 +363,7 @@
       box-shadow: 0 28px 70px rgba(31,41,51,.22);
       border: 1px solid rgba(31,41,51,.25);
       overflow: hidden;
+      transition: box-shadow .2s ease;
     }
 
     .paper-frame.landscape { aspect-ratio: 29.7 / 21; }
@@ -432,13 +474,21 @@
 
     @media (max-width: 1020px) {
       .app { grid-template-columns: 1fr; padding: 14px; }
+      .app-header { grid-column: auto; grid-template-columns: 1fr; }
+      .project-bar { grid-template-columns: 1fr 1fr; }
       .sidebar { max-height: none; }
       .paper-shell { height: 70vh; }
     }
 
+    @media (max-width: 640px) {
+      .project-bar { grid-template-columns: 1fr; }
+      .grid-2, .big-input-row, .toggles { grid-template-columns: 1fr; }
+    }
+
     @media print {
       body { background: white; }
-      .sidebar, .stage-header, .toast { display: none !important; }
+      .app-header, .sidebar, .stage-header, .toast { display: none !important; }
+      #ghost-preview, #mini-protractor { display: none !important; }
       .app { display: block; padding: 0; max-width: none; }
       .stage-card { box-shadow: none; border: 0; padding: 0; }
       .paper-shell { height: 100vh; padding: 0; border: 0; background: white; }
@@ -448,7 +498,7 @@
 </head>
 <body>
   <main class="app">
-    <aside class="sidebar">
+    <header class="app-header">
       <div class="brand">
         <div class="logo" aria-hidden="true">
           <svg viewBox="0 0 64 64" fill="none">
@@ -464,10 +514,8 @@
           <p>Single-line art from centimetres + angles</p>
         </div>
       </div>
-
-      <section class="section">
-        <div class="section-title"><h2>Project details</h2></div>
-        <div class="grid-2">
+      <div>
+        <div class="project-bar">
           <div>
             <label for="studentName">Student name</label>
             <input id="studentName" type="text" placeholder="Name" />
@@ -476,33 +524,37 @@
             <label for="studentClass">Class</label>
             <input id="studentClass" type="text" placeholder="6A" />
           </div>
+          <div>
+            <label for="artTitle">Artwork title</label>
+            <input id="artTitle" type="text" placeholder="My single-line lion" />
+          </div>
+          <div>
+            <label for="angleMode">Drawing mode</label>
+            <select id="angleMode">
+              <option value="classroom">Classroom</option>
+              <option value="full">Advanced</option>
+            </select>
+          </div>
         </div>
-        <div style="margin-top:10px">
-          <label for="artTitle">Artwork title</label>
-          <input id="artTitle" type="text" placeholder="My single-line lion" />
-        </div>
-      </section>
+        <div id="modeNote" class="mode-note">Classroom mode: 0 to 180 degrees above or below the helper line.</div>
+      </div>
+    </header>
+
+    <aside class="sidebar">
 
       <section class="section">
         <div class="section-title"><h2>Add a line</h2></div>
         <div class="big-input-row">
           <div>
             <label for="lengthInput">Length</label>
-            <input id="lengthInput" type="number" min="0.1" step="0.1" placeholder="cm" />
+            <input id="lengthInput" type="number" min="1" step="0.1" placeholder="cm" />
           </div>
           <div>
             <label for="angleInput">Angle</label>
-            <input id="angleInput" type="number" min="0" max="180" step="1" placeholder="degrees" />
+            <input id="angleInput" type="number" min="-180" max="180" step="1" placeholder="degrees" />
           </div>
         </div>
-        <div class="grid-2" style="margin-bottom:10px">
-          <div>
-            <label for="angleMode">Angle mode</label>
-            <select id="angleMode">
-              <option value="classroom">Classroom: 0–180° + above/below</option>
-              <option value="full">Advanced: 0–359° full turn</option>
-            </select>
-          </div>
+        <div style="margin-bottom:10px">
           <div id="directionWrap">
             <label for="directionInput">Direction</label>
             <select id="directionInput">
@@ -516,9 +568,9 @@
       </section>
 
       <section class="section">
-        <div class="section-title"><h2>Colour palette</h2><span id="currentColorLabel" class="hint" style="margin:0">Ink</span></div>
+        <div class="section-title"><h2>Line Colour</h2><span id="currentColorLabel" class="current-colour">Ink</span></div>
         <div id="palette" class="palette"></div>
-        <div class="grid-2" style="margin-top:10px">
+        <div style="margin-top:10px">
           <div>
             <label for="lineWidth">Pen width</label>
             <select id="lineWidth">
@@ -526,15 +578,6 @@
               <option value="2" selected>Normal</option>
               <option value="3">Bold</option>
               <option value="4">Marker</option>
-            </select>
-          </div>
-          <div>
-            <label for="bgColor">Paper tone</label>
-            <select id="bgColor">
-              <option value="#fffdf7">Warm white</option>
-              <option value="#ffffff">White</option>
-              <option value="#f6f1e6">Sketchbook</option>
-              <option value="#f2f5f7">Cool pale</option>
             </select>
           </div>
         </div>
@@ -556,7 +599,7 @@
         <div class="grid-2">
           <button class="btn ghost" id="undoBtn">Undo</button>
           <button class="btn bad" id="clearBtn">Refresh / clear</button>
-          <button class="btn ghost" id="centerBtn">Center art</button>
+          <button class="btn ghost" id="centerBtn">Center Art</button>
           <button class="btn good" id="animateBtn">Redraw animation</button>
         </div>
         <div style="margin-top:12px">
@@ -579,6 +622,8 @@
           <label class="checkline"><input id="showLabels" type="checkbox" checked /> point labels</label>
           <label class="checkline"><input id="showStepNumbers" type="checkbox" /> step numbers</label>
           <label class="checkline"><input id="showStart" type="checkbox" checked /> start dot</label>
+          <label class="checkline"><input id="showPreview" type="checkbox" checked /> preview line</label>
+          <label class="checkline"><input id="showProtractor" type="checkbox" checked /> mini protractor</label>
         </div>
         <div class="grid-2" style="margin-top:10px">
           <div>
@@ -591,9 +636,18 @@
           <div>
             <label for="animationSpeed">Animation</label>
             <select id="animationSpeed">
-              <option value="slow">Slow</option>
-              <option value="normal" selected>Normal</option>
+              <option value="slow" selected>Slow</option>
+              <option value="normal">Normal</option>
               <option value="fast">Fast</option>
+            </select>
+          </div>
+          <div>
+            <label for="bgColor">Paper tone</label>
+            <select id="bgColor">
+              <option value="#fffdf7">Warm white</option>
+              <option value="#ffffff">White</option>
+              <option value="#f6f1e6">Sketchbook</option>
+              <option value="#f2f5f7">Cool pale</option>
             </select>
           </div>
         </div>
@@ -645,6 +699,9 @@
 
   <script>
     const MIN_LINES = 40;
+    const MIN_SEGMENT_CM = 1.0;
+    const MAX_SEGMENT_CM = 80;
+    const INITIAL_VIEW_FOCUS = 0.7;
     const A4 = {
       portrait: { w: 21, h: 29.7 },
       landscape: { w: 29.7, h: 21 }
@@ -684,6 +741,8 @@
       showLabels: true,
       showStepNumbers: false,
       showStart: true,
+      showPreview: true,
+      showProtractor: true,
       segments: []
     };
 
@@ -715,6 +774,8 @@
       showLabels: document.getElementById('showLabels'),
       showStepNumbers: document.getElementById('showStepNumbers'),
       showStart: document.getElementById('showStart'),
+      showPreview: document.getElementById('showPreview'),
+      showProtractor: document.getElementById('showProtractor'),
       orientation: document.getElementById('orientation'),
       animationSpeed: document.getElementById('animationSpeed'),
       downloadSvgBtn: document.getElementById('downloadSvgBtn'),
@@ -726,6 +787,7 @@
       historyBody: document.getElementById('historyBody'),
       previewTitle: document.getElementById('previewTitle'),
       previewMeta: document.getElementById('previewMeta'),
+      modeNote: document.getElementById('modeNote'),
       paperFrame: document.getElementById('paperFrame'),
       artSvg: document.getElementById('artSvg'),
       printBtn: document.getElementById('printBtn'),
@@ -734,6 +796,7 @@
     };
 
     let animationId = null;
+    let activeWarning = '';
 
     function pageSize() {
       return A4[state.orientation];
@@ -751,6 +814,90 @@
     function safeNumber(value, fallback = 0) {
       const n = Number(value);
       return Number.isFinite(n) ? n : fallback;
+    }
+
+    function normalize360(angle) {
+      return ((angle % 360) + 360) % 360;
+    }
+
+    function isInsidePage(point) {
+      const { w, h } = pageSize();
+      return point.x >= 0 && point.x <= w && point.y >= 0 && point.y <= h;
+    }
+
+    function currentPoint() {
+      const points = computePoints();
+      return points[points.length - 1];
+    }
+
+    function lastEffectiveAngle() {
+      const last = state.segments[state.segments.length - 1];
+      if (!last) return null;
+      if (Number.isFinite(Number(last.effectiveAngle))) return Number(last.effectiveAngle);
+      return effectiveAngleForSegment(last);
+    }
+
+    function effectiveAngleForSegment(segment) {
+      if (segment.mode === 'full') return normalize360(Number(segment.angle));
+      const signed = segment.direction === 'below' ? -Number(segment.angle) : Number(segment.angle);
+      return normalize360(signed);
+    }
+
+    // Shared validation for the Draw button and the live preview helpers.
+    function readCandidateSegment() {
+      const rawLength = els.lengthInput.value.trim();
+      const rawAngle = els.angleInput.value.trim();
+      if (!rawLength || !rawAngle) return { ok: false, quiet: true };
+
+      const length = Number(rawLength);
+      const raw = Number(rawAngle);
+      if (!Number.isFinite(length)) return { ok: false, message: 'Enter a valid length in cm.' };
+      if (length < MIN_SEGMENT_CM) return { ok: false, message: `Length must be at least ${MIN_SEGMENT_CM.toFixed(1)} cm.` };
+      if (length > MAX_SEGMENT_CM) return { ok: false, message: 'That length is too large for an A4 page.' };
+      if (!Number.isFinite(raw)) return { ok: false, message: 'Enter a valid angle in degrees.' };
+
+      let angle = raw;
+      let direction = els.directionInput.value;
+      let signedAngle = raw;
+      if (state.angleMode === 'classroom') {
+        if (raw < 0) {
+          direction = 'below';
+          angle = Math.abs(raw);
+        }
+        if (angle > 180) return { ok: false, message: 'Classroom angles must be from 0° to 180°.' };
+        signedAngle = direction === 'below' ? -angle : angle;
+      } else {
+        if (raw < -359 || raw > 359) return { ok: false, message: 'Advanced angles must be from -359° to 359°.' };
+        angle = normalize360(raw);
+        signedAngle = raw;
+      }
+
+      const roundedLength = Math.round(length * 10) / 10;
+      const roundedAngle = Math.round(angle * 1000) / 1000;
+      const effectiveAngle = normalize360(signedAngle);
+      const segment = {
+        length: roundedLength,
+        angle: roundedAngle,
+        direction,
+        mode: state.angleMode,
+        effectiveAngle,
+        color: state.currentColor,
+        colorName: state.currentColorName,
+        width: Number(state.lineWidth)
+      };
+      const from = currentPoint();
+      const d = segmentDelta(segment);
+      const to = { x: from.x + d.dx, y: from.y + d.dy };
+
+      const previousAngle = lastEffectiveAngle();
+      if (previousAngle !== null && Math.abs(effectiveAngle - previousAngle) < 0.0001) {
+        return { ok: false, message: 'Change the angle before drawing the next line.', segment, from, to, sameAngle: true };
+      }
+      if (!isInsidePage(to)) {
+        return { ok: false, message: 'That line would leave the paper. Choose a shorter length or different angle.', segment, from, to, outside: true };
+      }
+
+      return { ok: true, segment, from, to, signedAngle };
     }
 
     function segmentDelta(segment) {
@@ -823,12 +970,84 @@
       return out;
     }
 
+    // Display-only preview line. Exports call createSVGString without this helper layer.
+    function buildPreviewSvg(candidate) {
+      if (!state.showPreview || !candidate.segment || !candidate.from || !candidate.to) return '';
+      const invalid = !candidate.ok;
+      const color = invalid ? '#c53030' : '#52606d';
+      const dash = invalid ? ' stroke-dasharray="0.28 0.16"' : ' stroke-dasharray="0.16 0.14"';
+      return `<g id="ghost-preview" pointer-events="none" opacity="${invalid ? '0.9' : '0.55'}">
+        <line x1="${candidate.from.x.toFixed(3)}" y1="${candidate.from.y.toFixed(3)}" x2="${candidate.to.x.toFixed(3)}" y2="${candidate.to.y.toFixed(3)}" stroke="${color}" stroke-width="0.035"${dash} stroke-linecap="round"/>
+        <circle cx="${candidate.to.x.toFixed(3)}" cy="${candidate.to.y.toFixed(3)}" r="0.10" fill="${color}" opacity="0.7"/>
+      </g>`;
+    }
+
+    // Small protractor guide at the active point, matching the current candidate angle.
+    function buildMiniProtractorSvg(candidate) {
+      if (!state.showProtractor || !candidate.segment || !candidate.from) return '';
+      const from = candidate.from;
+      const seg = candidate.segment;
+      const invalid = !candidate.ok;
+      const color = invalid ? '#c53030' : '#476072';
+      const radius = 1.45;
+      const signed = seg.mode === 'full'
+        ? (Number(els.angleInput.value) || 0)
+        : (seg.direction === 'below' ? -Number(seg.angle) : Number(seg.angle));
+      const steps = Math.max(8, Math.ceil(Math.abs(signed) / 8));
+      const pts = [];
+      for (let i = 0; i <= steps; i++) {
+        const a = (signed * i / steps) * Math.PI / 180;
+        pts.push(`${(from.x + Math.cos(a) * radius).toFixed(3)},${(from.y - Math.sin(a) * radius).toFixed(3)}`);
+      }
+      let ticks = '';
+      const tickDir = signed < 0 ? -1 : 1;
+      const tickMax = Math.min(180, Math.abs(signed));
+      for (let a = 30; a <= tickMax; a += 30) {
+        const rad = (a * tickDir) * Math.PI / 180;
+        const outer = radius;
+        const inner = radius - (a % 90 === 0 ? 0.18 : 0.11);
+        ticks += `<line x1="${(from.x + Math.cos(rad) * inner).toFixed(3)}" y1="${(from.y - Math.sin(rad) * inner).toFixed(3)}" x2="${(from.x + Math.cos(rad) * outer).toFixed(3)}" y2="${(from.y - Math.sin(rad) * outer).toFixed(3)}" stroke="${color}" stroke-width="0.025"/>`;
+      }
+      const labelAngle = seg.mode === 'full' ? normalize360(seg.angle) : Number(seg.angle);
+      const labelY = signed < 0 ? from.y + 0.55 : from.y - 0.38;
+      return `<g id="mini-protractor" pointer-events="none" opacity="0.72" fill="none" stroke-linecap="round">
+        <circle cx="${from.x.toFixed(3)}" cy="${from.y.toFixed(3)}" r="0.08" fill="${color}" stroke="none"/>
+        <line x1="${from.x.toFixed(3)}" y1="${from.y.toFixed(3)}" x2="${(from.x + radius + 0.2).toFixed(3)}" y2="${from.y.toFixed(3)}" stroke="${color}" stroke-width="0.025" stroke-dasharray="0.16 0.12"/>
+        <polyline points="${pts.join(' ')}" stroke="${color}" stroke-width="0.04"/>
+        ${ticks}
+        <text x="${(from.x + 0.24).toFixed(3)}" y="${labelY.toFixed(3)}" fill="${color}" stroke="none" font-family="Arial, sans-serif" font-size="0.27" font-weight="700">${labelAngle.toFixed(0)}°</text>
+      </g>`;
+    }
+
+    function displayViewBox(candidate = null) {
+      const { w, h } = pageSize();
+      const pageRatio = w / h;
+      const points = computePoints();
+      const visible = points.slice();
+      if (candidate && candidate.to && isInsidePage(candidate.to)) visible.push(candidate.to);
+      const b = boundsForPoints(visible);
+      const baseW = w * INITIAL_VIEW_FOCUS;
+      const baseH = h * INITIAL_VIEW_FOCUS;
+      let viewW = Math.max(baseW, b.w + 3);
+      let viewH = Math.max(baseH, b.h + 3);
+      if (viewW / viewH > pageRatio) viewH = viewW / pageRatio;
+      else viewW = viewH * pageRatio;
+      viewW = Math.min(w, viewW);
+      viewH = Math.min(h, viewH);
+      let cx = b.minX + b.w / 2;
+      let cy = b.minY + b.h / 2;
+      let x = Math.max(0, Math.min(w - viewW, cx - viewW / 2));
+      let y = Math.max(0, Math.min(h - viewH, cy - viewH / 2));
+      return `${x.toFixed(3)} ${y.toFixed(3)} ${viewW.toFixed(3)} ${viewH.toFixed(3)}`;
+    }
+
     function createSVGString(options = {}) {
       const opts = {
         showGrid: state.showGrid,
         showLabels: state.showLabels,
         showStepNumbers: state.showStepNumbers,
         showStart: state.showStart,
+        includeHelpers: false,
         includeMeta: true,
         animatedLines: null,
         pen: null,
@@ -880,6 +1099,11 @@
         svg += '</g>';
       }
 
+      if (opts.includeHelpers && opts.candidate) {
+        svg += buildPreviewSvg(opts.candidate);
+        svg += buildMiniProtractorSvg(opts.candidate);
+      }
+
       if (opts.pen) {
         svg += `<g class="pen-dot"><circle cx="${opts.pen.x.toFixed(3)}" cy="${opts.pen.y.toFixed(3)}" r="0.18" fill="#ffffff" stroke="#1f2933" stroke-width="0.06"/><circle class="sparkle" cx="${opts.pen.x.toFixed(3)}" cy="${opts.pen.y.toFixed(3)}" r="0.07" fill="#f2c94c"/></g>`;
       }
@@ -890,9 +1114,14 @@
 
     function render(options = {}) {
       const { w, h } = pageSize();
+      const candidate = options.animatedLines ? null : readCandidateSegment();
       els.paperFrame.classList.toggle('landscape', state.orientation === 'landscape');
-      const svg = createSVGString(options).replace(/^<\?xml[^>]*>\n?/, '');
-      els.artSvg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      const svg = createSVGString({
+        includeHelpers: !options.animatedLines,
+        candidate,
+        ...options
+      }).replace(/^<\?xml[^>]*>\n?/, '');
+      els.artSvg.setAttribute('viewBox', options.animatedLines ? `0 0 ${w} ${h}` : displayViewBox(candidate));
       els.artSvg.innerHTML = svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
       updateUiStats();
       renderHistory();
@@ -903,7 +1132,6 @@
       const points = computePoints();
       const outside = pointsOutside(points);
       const total = state.segments.reduce((sum, s) => sum + Number(s.length || 0), 0);
-      const shortSegments = state.segments.filter(s => Number(s.length) < 2).length;
       const progress = Math.min(100, (state.segments.length / MIN_LINES) * 100);
 
       els.lineCount.textContent = state.segments.length;
@@ -914,16 +1142,21 @@
       els.previewTitle.textContent = state.artTitle || 'Untitled Path';
       els.previewMeta.textContent = `${state.studentName || 'Student'}${state.studentClass ? ' · ' + state.studentClass : ''} · ${state.segments.length} line${state.segments.length === 1 ? '' : 's'}`;
 
+      els.previewMeta.textContent = `${state.studentName || 'Student'}${state.studentClass ? ' · ' + state.studentClass : ''} · ${state.segments.length} line${state.segments.length === 1 ? '' : 's'} · ${state.angleMode === 'full' ? 'Advanced' : 'Classroom'} mode`;
+      els.modeNote.textContent = state.angleMode === 'full'
+        ? 'Advanced mode: use -359 to 359 degrees for full directional drawing.'
+        : 'Classroom mode: use 0 to 180 degrees above or below the helper line. Negative angles become below.';
+
       els.statusBox.className = 'status-box';
-      if (state.segments.length < MIN_LINES) {
+      if (activeWarning) {
+        els.statusBox.classList.add('bad');
+        els.statusBox.textContent = activeWarning;
+      } else if (state.segments.length < MIN_LINES) {
         els.statusBox.classList.add('warn');
         els.statusBox.textContent = `Needs ${MIN_LINES - state.segments.length} more line${MIN_LINES - state.segments.length === 1 ? '' : 's'}. Minimum required: ${MIN_LINES}.`;
       } else if (outside > 0) {
         els.statusBox.classList.add('bad');
         els.statusBox.textContent = `${outside} point${outside === 1 ? ' is' : 's are'} outside the A4 page. Press Center Art or move the drawing.`;
-      } else if (shortSegments > 0) {
-        els.statusBox.classList.add('warn');
-        els.statusBox.textContent = `Complete, but ${shortSegments} line${shortSegments === 1 ? ' is' : 's are'} shorter than 2 cm. Check your teacher's minimum-length rule.`;
       } else {
         els.statusBox.classList.add('good');
         els.statusBox.textContent = 'Ready to export. The artwork has at least 40 lines and fits on the page.';
@@ -940,13 +1173,32 @@
           <td>${i + 1}</td>
           <td>${Number(s.length).toFixed(1)}</td>
           <td>${Number(s.angle).toFixed(0)}°</td>
-          <td>${s.mode === 'full' ? 'full' : s.direction}</td>
+          <td>${s.mode === 'full' ? 'advanced' : s.direction}</td>
           <td><span class="mini-color" style="background:${escapeXml(s.color)}"></span></td>
           <td><button class="btn small bad" data-delete-step="${i}">×</button></td>
         </tr>`).join('');
     }
 
     function addLine() {
+      const candidate = readCandidateSegment();
+      if (!candidate.ok) {
+        activeWarning = candidate.message || 'Enter a length and angle before drawing.';
+        render();
+        showToast(activeWarning);
+        return;
+      }
+
+      activeWarning = '';
+      if (state.angleMode === 'classroom' && candidate.segment.direction === 'below') {
+        els.directionInput.value = 'below';
+      }
+      state.segments.push(candidate.segment);
+      els.lengthInput.value = '';
+      els.lengthInput.focus();
+      render();
+      showToast('Line added');
+      return;
+
       const length = safeNumber(els.lengthInput.value, NaN);
       const angle = safeNumber(els.angleInput.value, NaN);
       if (!Number.isFinite(length) || length <= 0) return showToast('Enter a valid length in cm.');
@@ -972,6 +1224,7 @@
 
     function undo() {
       if (!state.segments.length) return showToast('Nothing to undo');
+      activeWarning = '';
       state.segments.pop();
       render();
       showToast('Undone');
@@ -980,6 +1233,7 @@
     function clearAll() {
       if (!state.segments.length && !state.artTitle && !state.studentName) return;
       if (!confirm('Clear the current artwork? This removes all lines.')) return;
+      activeWarning = '';
       state.segments = [];
       const { w, h } = pageSize();
       state.start = { x: w / 2, y: h / 2 };
@@ -996,6 +1250,7 @@
       const dy = (h / 2) - (b.minY + b.h / 2);
       state.start.x += dx;
       state.start.y += dy;
+      activeWarning = '';
       render();
       showToast('Centered');
     }
@@ -1003,6 +1258,7 @@
     function resetStart() {
       const { w, h } = pageSize();
       state.start = { x: w / 2, y: h / 2 };
+      activeWarning = '';
       render();
       showToast('Start reset');
     }
@@ -1013,6 +1269,7 @@
       if (dir === 'down') state.start.y += amount;
       if (dir === 'left') state.start.x -= amount;
       if (dir === 'right') state.start.x += amount;
+      activeWarning = '';
       render();
     }
 
@@ -1022,8 +1279,8 @@
       const points = computePoints();
       const items = computeLineItems(points);
       const totalLength = items.reduce((sum, item) => sum + item.length, 0);
-      const speedMap = { slow: 12, normal: 24, fast: 45 }; // cm per second
-      const speed = speedMap[els.animationSpeed.value] || 24;
+      const speedMap = { slow: 6, normal: 16, fast: 32 }; // cm per second
+      const speed = speedMap[els.animationSpeed.value] || 6;
       const startTime = performance.now();
 
       function frame(now) {
@@ -1166,6 +1423,9 @@
         if (!raw) return;
         const saved = JSON.parse(raw);
         Object.assign(state, saved);
+        if (state.showPreview === undefined) state.showPreview = true;
+        if (state.showProtractor === undefined) state.showProtractor = true;
+        if (!Array.isArray(state.segments)) state.segments = [];
       } catch (e) {}
     }
 
@@ -1175,15 +1435,21 @@
       els.artTitle.value = state.artTitle || '';
       els.angleMode.value = state.angleMode || 'classroom';
       els.directionWrap.style.display = state.angleMode === 'full' ? 'none' : 'block';
+      els.angleInput.min = state.angleMode === 'full' ? '-359' : '-180';
       els.angleInput.max = state.angleMode === 'full' ? '359' : '180';
+      els.angleInput.placeholder = state.angleMode === 'full' ? '-359 to 359' : '0 to 180';
       els.lineWidth.value = String(state.lineWidth || 2);
       els.bgColor.value = state.bgColor || '#fffdf7';
       els.showGrid.checked = !!state.showGrid;
       els.showLabels.checked = !!state.showLabels;
       els.showStepNumbers.checked = !!state.showStepNumbers;
       els.showStart.checked = !!state.showStart;
+      els.showPreview.checked = state.showPreview !== false;
+      els.showProtractor.checked = state.showProtractor !== false;
+      els.animationSpeed.value = 'slow';
       els.orientation.value = state.orientation || 'portrait';
       els.currentColorLabel.textContent = state.currentColorName || 'Ink';
+      els.currentColorLabel.style.setProperty('--selected-colour', state.currentColor || '#1f2933');
     }
 
     function showToast(message) {
@@ -1198,6 +1464,10 @@
       [els.lengthInput, els.angleInput].forEach(input => {
         input.addEventListener('keydown', e => {
           if (e.key === 'Enter') addLine();
+        });
+        input.addEventListener('input', () => {
+          activeWarning = '';
+          render();
         });
       });
 
@@ -1219,17 +1489,23 @@
       els.angleMode.addEventListener('change', () => {
         state.angleMode = els.angleMode.value;
         els.directionWrap.style.display = state.angleMode === 'full' ? 'none' : 'block';
+        els.angleInput.min = state.angleMode === 'full' ? '-359' : '-180';
         els.angleInput.max = state.angleMode === 'full' ? '359' : '180';
+        els.angleInput.placeholder = state.angleMode === 'full' ? '-359 to 359' : '0 to 180';
+        activeWarning = '';
         render();
       });
+      els.directionInput.addEventListener('change', () => { activeWarning = ''; render(); });
 
-      els.lineWidth.addEventListener('change', () => { state.lineWidth = Number(els.lineWidth.value); saveLocal(); });
+      els.lineWidth.addEventListener('change', () => { state.lineWidth = Number(els.lineWidth.value); render(); });
       els.bgColor.addEventListener('change', () => { state.bgColor = els.bgColor.value; render(); });
 
       els.showGrid.addEventListener('change', () => { state.showGrid = els.showGrid.checked; render(); });
       els.showLabels.addEventListener('change', () => { state.showLabels = els.showLabels.checked; render(); });
       els.showStepNumbers.addEventListener('change', () => { state.showStepNumbers = els.showStepNumbers.checked; render(); });
       els.showStart.addEventListener('change', () => { state.showStart = els.showStart.checked; render(); });
+      els.showPreview.addEventListener('change', () => { state.showPreview = els.showPreview.checked; render(); });
+      els.showProtractor.addEventListener('change', () => { state.showProtractor = els.showProtractor.checked; render(); });
 
       els.orientation.addEventListener('change', () => {
         const old = pageSize();
@@ -1265,10 +1541,12 @@
         state.currentColor = swatch.dataset.color;
         state.currentColorName = swatch.dataset.name;
         els.currentColorLabel.textContent = state.currentColorName;
+        els.currentColorLabel.style.setProperty('--selected-colour', state.currentColor);
         document.querySelectorAll('.swatch').forEach(s => s.classList.toggle('selected', s.dataset.color === state.currentColor));
-        saveLocal();
+        render();
       });
       document.querySelectorAll('.swatch').forEach(s => s.classList.toggle('selected', s.dataset.color === state.currentColor));
+      els.currentColorLabel.style.setProperty('--selected-colour', state.currentColor || '#1f2933');
     }
 
     function init() {
