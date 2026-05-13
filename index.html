@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Protractor Path Art</title>
+  <style>
+    :root {
+      --bg: #f4f0e8;
+      --panel: rgba(255,255,255,.78);
+      --panel-strong: #fffaf2;
+      --ink: #1f2933;
+      --muted: #65717f;
+      --line: #d7cfc0;
+      --accent: #5b6f86;
+      --accent-2: #9f6b4e;
+      --good: #3f7d58;
+      --warn: #b7791f;
+      --bad: #9b2c2c;
+      --shadow: 0 20px 60px rgba(28, 35, 45, .14);
+      --radius: 22px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --serif: Georgia, "Times New Roman", serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(159,107,78,.16), transparent 34rem),
+        radial-gradient(circle at top right, rgba(91,111,134,.18), transparent 32rem),
+        linear-gradient(135deg, #f7f2e9 0%, #ebe4d8 100%);
+      color: var(--ink);
+      font-family: var(--sans);
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    .app {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 390px minmax(0, 1fr);
+      gap: 22px;
+    }
+
+    .sidebar, .stage-card {
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255,255,255,.7);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar {
+      padding: 18px;
+      align-self: start;
+      max-height: calc(100vh - 48px);
+      overflow: auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 6px 4px 18px;
+      border-bottom: 1px solid rgba(31,41,51,.1);
+      margin-bottom: 16px;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #314255, #798da2);
+      box-shadow: 0 12px 24px rgba(49,66,85,.22);
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .logo svg { width: 34px; height: 34px; }
+
+    .brand h1 {
+      font-size: 21px;
+      line-height: 1.1;
+      margin: 0;
+      letter-spacing: -.03em;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .section {
+      background: rgba(255,255,255,.5);
+      border: 1px solid rgba(31,41,51,.08);
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .section-title h2 {
+      font-size: 13px;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: #4a5561;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+      margin: 8px 0 0;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: #52606d;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1px solid rgba(31,41,51,.18);
+      background: rgba(255,255,255,.86);
+      color: var(--ink);
+      border-radius: 12px;
+      padding: 10px 11px;
+      outline: none;
+      transition: border .15s, box-shadow .15s, background .15s;
+    }
+
+    input:focus, select:focus {
+      border-color: rgba(91,111,134,.8);
+      box-shadow: 0 0 0 4px rgba(91,111,134,.13);
+      background: white;
+    }
+
+    .big-input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 14px;
+      padding: 10px 13px;
+      background: #e8dfd0;
+      color: #1f2933;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 42px;
+      text-decoration: none;
+      user-select: none;
+    }
+
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 18px rgba(31,41,51,.1); }
+    .btn:active { transform: translateY(0); box-shadow: none; }
+    .btn.primary { background: linear-gradient(135deg, #34485c, #60758a); color: white; }
+    .btn.good { background: #dcebdd; color: #244733; }
+    .btn.warn { background: #f5e1b8; color: #6c4310; }
+    .btn.bad { background: #f0c8c8; color: #6b1e1e; }
+    .btn.ghost { background: rgba(255,255,255,.62); border: 1px solid rgba(31,41,51,.1); }
+    .btn.small { min-height: 32px; padding: 6px 9px; border-radius: 10px; font-size: 12px; }
+    .btn.full { width: 100%; }
+
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 7px;
+    }
+
+    .swatch {
+      height: 30px;
+      border-radius: 10px;
+      border: 2px solid rgba(255,255,255,.9);
+      outline: 1px solid rgba(31,41,51,.12);
+      cursor: pointer;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.08);
+      transition: transform .12s, outline .12s;
+    }
+    .swatch.selected { outline: 3px solid #26384c; transform: scale(1.05); }
+
+    .progress-wrap {
+      margin-top: 10px;
+      background: rgba(31,41,51,.08);
+      border-radius: 999px;
+      height: 12px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #9f6b4e, #5b6f86);
+      border-radius: inherit;
+      transition: width .2s ease;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .stat {
+      background: rgba(255,255,255,.68);
+      border: 1px solid rgba(31,41,51,.08);
+      border-radius: 14px;
+      padding: 10px;
+      min-height: 66px;
+    }
+    .stat strong {
+      display: block;
+      font-size: 19px;
+      letter-spacing: -.04em;
+    }
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 3px;
+    }
+
+    .status-box {
+      margin-top: 10px;
+      padding: 10px 11px;
+      border-radius: 13px;
+      font-size: 13px;
+      line-height: 1.35;
+      border: 1px solid rgba(31,41,51,.08);
+      background: rgba(255,255,255,.62);
+    }
+    .status-box.good { background: rgba(63,125,88,.12); color: #244733; }
+    .status-box.warn { background: rgba(183,121,31,.13); color: #70460e; }
+    .status-box.bad { background: rgba(155,44,44,.12); color: #742a2a; }
+
+    .stage-card {
+      padding: 18px;
+      min-width: 0;
+    }
+
+    .stage-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .stage-title h2 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: -.04em;
+    }
+    .stage-title p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .stage-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .paper-shell {
+      width: 100%;
+      height: calc(100vh - 150px);
+      min-height: 560px;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(45deg, rgba(31,41,51,.04) 25%, transparent 25%, transparent 75%, rgba(31,41,51,.04) 75%),
+        linear-gradient(45deg, rgba(31,41,51,.04) 25%, transparent 25%, transparent 75%, rgba(31,41,51,.04) 75%);
+      background-position: 0 0, 12px 12px;
+      background-size: 24px 24px;
+      border-radius: 18px;
+      border: 1px solid rgba(31,41,51,.1);
+      overflow: hidden;
+      padding: 18px;
+      position: relative;
+    }
+
+    .paper-frame {
+      height: 100%;
+      max-width: 100%;
+      aspect-ratio: 21 / 29.7;
+      background: #fffdf7;
+      border-radius: 3px;
+      box-shadow: 0 28px 70px rgba(31,41,51,.22);
+      border: 1px solid rgba(31,41,51,.25);
+      overflow: hidden;
+    }
+
+    .paper-frame.landscape { aspect-ratio: 29.7 / 21; }
+
+    svg#artSvg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #fffdf7;
+    }
+
+    .instruction-list {
+      max-height: 260px;
+      overflow: auto;
+      border-radius: 14px;
+      border: 1px solid rgba(31,41,51,.1);
+      background: rgba(255,255,255,.58);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    th, td {
+      padding: 8px 7px;
+      border-bottom: 1px solid rgba(31,41,51,.08);
+      text-align: left;
+      white-space: nowrap;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      background: #fff7eb;
+      color: #52606d;
+      z-index: 1;
+    }
+    td:last-child, th:last-child { text-align: right; }
+
+    .mini-color {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      display: inline-block;
+      vertical-align: middle;
+      border: 1px solid rgba(0,0,0,.12);
+    }
+
+    .toggles {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .checkline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #52606d;
+      font-weight: 700;
+      background: rgba(255,255,255,.56);
+      border-radius: 12px;
+      padding: 8px 9px;
+      border: 1px solid rgba(31,41,51,.08);
+    }
+    .checkline input { width: auto; }
+
+    .nudge-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      max-width: 170px;
+      margin: 0 auto;
+    }
+    .nudge-grid .spacer { visibility: hidden; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(20px);
+      background: #1f2933;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 999px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s, transform .18s;
+      z-index: 50;
+      box-shadow: 0 18px 40px rgba(0,0,0,.22);
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .pen-dot {
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,.25));
+    }
+
+    .sparkle {
+      animation: pop .75s ease-out infinite alternate;
+      transform-origin: center;
+    }
+    @keyframes pop {
+      from { opacity: .3; transform: scale(.75); }
+      to { opacity: 1; transform: scale(1.15); }
+    }
+
+    @media (max-width: 1020px) {
+      .app { grid-template-columns: 1fr; padding: 14px; }
+      .sidebar { max-height: none; }
+      .paper-shell { height: 70vh; }
+    }
+
+    @media print {
+      body { background: white; }
+      .sidebar, .stage-header, .toast { display: none !important; }
+      .app { display: block; padding: 0; max-width: none; }
+      .stage-card { box-shadow: none; border: 0; padding: 0; }
+      .paper-shell { height: 100vh; padding: 0; border: 0; background: white; }
+      .paper-frame { box-shadow: none; border: 0; height: 100vh; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 64 64" fill="none">
+            <path d="M10 45 L27 14 L35 35 L53 20" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="10" cy="45" r="4" fill="#f5dfbf"/>
+            <circle cx="27" cy="14" r="4" fill="#f5dfbf"/>
+            <circle cx="35" cy="35" r="4" fill="#f5dfbf"/>
+            <circle cx="53" cy="20" r="4" fill="#f5dfbf"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Protractor Path Art</h1>
+          <p>Single-line art from centimetres + angles</p>
+        </div>
+      </div>
+
+      <section class="section">
+        <div class="section-title"><h2>Project details</h2></div>
+        <div class="grid-2">
+          <div>
+            <label for="studentName">Student name</label>
+            <input id="studentName" type="text" placeholder="Name" />
+          </div>
+          <div>
+            <label for="studentClass">Class</label>
+            <input id="studentClass" type="text" placeholder="6A" />
+          </div>
+        </div>
+        <div style="margin-top:10px">
+          <label for="artTitle">Artwork title</label>
+          <input id="artTitle" type="text" placeholder="My single-line lion" />
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title"><h2>Add a line</h2></div>
+        <div class="big-input-row">
+          <div>
+            <label for="lengthInput">Length</label>
+            <input id="lengthInput" type="number" min="0.1" step="0.1" placeholder="cm" />
+          </div>
+          <div>
+            <label for="angleInput">Angle</label>
+            <input id="angleInput" type="number" min="0" max="180" step="1" placeholder="degrees" />
+          </div>
+        </div>
+        <div class="grid-2" style="margin-bottom:10px">
+          <div>
+            <label for="angleMode">Angle mode</label>
+            <select id="angleMode">
+              <option value="classroom">Classroom: 0–180° + above/below</option>
+              <option value="full">Advanced: 0–359° full turn</option>
+            </select>
+          </div>
+          <div id="directionWrap">
+            <label for="directionInput">Direction</label>
+            <select id="directionInput">
+              <option value="above">Above helper line</option>
+              <option value="below">Below helper line</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn primary full" id="addLineBtn">Draw line</button>
+        <p class="hint">Classroom mode matches a protractor placed on a horizontal helper line at each new point.</p>
+      </section>
+
+      <section class="section">
+        <div class="section-title"><h2>Colour palette</h2><span id="currentColorLabel" class="hint" style="margin:0">Ink</span></div>
+        <div id="palette" class="palette"></div>
+        <div class="grid-2" style="margin-top:10px">
+          <div>
+            <label for="lineWidth">Pen width</label>
+            <select id="lineWidth">
+              <option value="1">Fine</option>
+              <option value="2" selected>Normal</option>
+              <option value="3">Bold</option>
+              <option value="4">Marker</option>
+            </select>
+          </div>
+          <div>
+            <label for="bgColor">Paper tone</label>
+            <select id="bgColor">
+              <option value="#fffdf7">Warm white</option>
+              <option value="#ffffff">White</option>
+              <option value="#f6f1e6">Sketchbook</option>
+              <option value="#f2f5f7">Cool pale</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title"><h2>Progress</h2><span id="readyBadge" class="hint" style="margin:0">0 / 40</span></div>
+        <div class="progress-wrap"><div id="progressBar" class="progress-bar"></div></div>
+        <div class="stats">
+          <div class="stat"><strong id="lineCount">0</strong><span>lines</span></div>
+          <div class="stat"><strong id="totalCm">0</strong><span>total cm</span></div>
+          <div class="stat"><strong id="pointCount">1</strong><span>points</span></div>
+        </div>
+        <div id="statusBox" class="status-box warn">Add 40 or more straight-line segments to complete the task.</div>
+      </section>
+
+      <section class="section">
+        <div class="section-title"><h2>Controls</h2></div>
+        <div class="grid-2">
+          <button class="btn ghost" id="undoBtn">Undo</button>
+          <button class="btn bad" id="clearBtn">Refresh / clear</button>
+          <button class="btn ghost" id="centerBtn">Center art</button>
+          <button class="btn good" id="animateBtn">Redraw animation</button>
+        </div>
+        <div style="margin-top:12px">
+          <label>Move art</label>
+          <div class="nudge-grid">
+            <button class="btn small spacer">·</button>
+            <button class="btn small ghost" data-nudge="up">↑</button>
+            <button class="btn small spacer">·</button>
+            <button class="btn small ghost" data-nudge="left">←</button>
+            <button class="btn small ghost" data-nudge="down">↓</button>
+            <button class="btn small ghost" data-nudge="right">→</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title"><h2>View options</h2></div>
+        <div class="toggles">
+          <label class="checkline"><input id="showGrid" type="checkbox" checked /> 1 cm grid</label>
+          <label class="checkline"><input id="showLabels" type="checkbox" checked /> point labels</label>
+          <label class="checkline"><input id="showStepNumbers" type="checkbox" /> step numbers</label>
+          <label class="checkline"><input id="showStart" type="checkbox" checked /> start dot</label>
+        </div>
+        <div class="grid-2" style="margin-top:10px">
+          <div>
+            <label for="orientation">Paper</label>
+            <select id="orientation">
+              <option value="portrait">A4 portrait</option>
+              <option value="landscape">A4 landscape</option>
+            </select>
+          </div>
+          <div>
+            <label for="animationSpeed">Animation</label>
+            <select id="animationSpeed">
+              <option value="slow">Slow</option>
+              <option value="normal" selected>Normal</option>
+              <option value="fast">Fast</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title"><h2>Export</h2></div>
+        <div class="grid-2">
+          <button class="btn ghost" id="downloadSvgBtn">SVG</button>
+          <button class="btn ghost" id="downloadPngBtn">PNG</button>
+          <button class="btn ghost" id="downloadJpegBtn">JPEG</button>
+          <button class="btn ghost" id="downloadTxtBtn">TXT</button>
+          <button class="btn ghost" id="downloadJsonBtn">Project JSON</button>
+          <button class="btn ghost" id="copyTxtBtn">Copy steps</button>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title"><h2>Line history</h2></div>
+        <div class="instruction-list">
+          <table>
+            <thead><tr><th>#</th><th>cm</th><th>angle</th><th>dir</th><th>colour</th><th></th></tr></thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </aside>
+
+    <section class="stage-card">
+      <div class="stage-header">
+        <div class="stage-title">
+          <h2 id="previewTitle">Untitled Path</h2>
+          <p id="previewMeta">Start at A. Add each line from the newest point.</p>
+        </div>
+        <div class="stage-actions">
+          <button class="btn ghost small" id="printBtn">Print view</button>
+          <button class="btn ghost small" id="resetStartBtn">Reset start</button>
+        </div>
+      </div>
+      <div class="paper-shell">
+        <div id="paperFrame" class="paper-frame">
+          <svg id="artSvg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Protractor path art preview"></svg>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast">Saved</div>
+
+  <script>
+    const MIN_LINES = 40;
+    const A4 = {
+      portrait: { w: 21, h: 29.7 },
+      landscape: { w: 29.7, h: 21 }
+    };
+
+    const palette = [
+      { name: 'Ink', value: '#1f2933' },
+      { name: 'Slate', value: '#5b6f86' },
+      { name: 'Terracotta', value: '#9f6b4e' },
+      { name: 'Forest', value: '#3f7d58' },
+      { name: 'Gold', value: '#b7791f' },
+      { name: 'Rose', value: '#b94c62' },
+      { name: 'Violet', value: '#6750a4' },
+      { name: 'Sky', value: '#2f80a7' },
+      { name: 'Black', value: '#111111' },
+      { name: 'Red', value: '#d64545' },
+      { name: 'Orange', value: '#e88932' },
+      { name: 'Yellow', value: '#f2c94c' },
+      { name: 'Green', value: '#27ae60' },
+      { name: 'Blue', value: '#2f80ed' },
+      { name: 'Purple', value: '#9b51e0' },
+      { name: 'Pink', value: '#eb5796' }
+    ];
+
+    const state = {
+      studentName: '',
+      studentClass: '',
+      artTitle: '',
+      orientation: 'portrait',
+      start: { x: A4.portrait.w / 2, y: A4.portrait.h / 2 },
+      angleMode: 'classroom',
+      currentColor: '#1f2933',
+      currentColorName: 'Ink',
+      lineWidth: 2,
+      bgColor: '#fffdf7',
+      showGrid: true,
+      showLabels: true,
+      showStepNumbers: false,
+      showStart: true,
+      segments: []
+    };
+
+    const els = {
+      studentName: document.getElementById('studentName'),
+      studentClass: document.getElementById('studentClass'),
+      artTitle: document.getElementById('artTitle'),
+      lengthInput: document.getElementById('lengthInput'),
+      angleInput: document.getElementById('angleInput'),
+      angleMode: document.getElementById('angleMode'),
+      directionWrap: document.getElementById('directionWrap'),
+      directionInput: document.getElementById('directionInput'),
+      addLineBtn: document.getElementById('addLineBtn'),
+      palette: document.getElementById('palette'),
+      currentColorLabel: document.getElementById('currentColorLabel'),
+      lineWidth: document.getElementById('lineWidth'),
+      bgColor: document.getElementById('bgColor'),
+      progressBar: document.getElementById('progressBar'),
+      readyBadge: document.getElementById('readyBadge'),
+      lineCount: document.getElementById('lineCount'),
+      totalCm: document.getElementById('totalCm'),
+      pointCount: document.getElementById('pointCount'),
+      statusBox: document.getElementById('statusBox'),
+      undoBtn: document.getElementById('undoBtn'),
+      clearBtn: document.getElementById('clearBtn'),
+      centerBtn: document.getElementById('centerBtn'),
+      animateBtn: document.getElementById('animateBtn'),
+      showGrid: document.getElementById('showGrid'),
+      showLabels: document.getElementById('showLabels'),
+      showStepNumbers: document.getElementById('showStepNumbers'),
+      showStart: document.getElementById('showStart'),
+      orientation: document.getElementById('orientation'),
+      animationSpeed: document.getElementById('animationSpeed'),
+      downloadSvgBtn: document.getElementById('downloadSvgBtn'),
+      downloadPngBtn: document.getElementById('downloadPngBtn'),
+      downloadJpegBtn: document.getElementById('downloadJpegBtn'),
+      downloadTxtBtn: document.getElementById('downloadTxtBtn'),
+      downloadJsonBtn: document.getElementById('downloadJsonBtn'),
+      copyTxtBtn: document.getElementById('copyTxtBtn'),
+      historyBody: document.getElementById('historyBody'),
+      previewTitle: document.getElementById('previewTitle'),
+      previewMeta: document.getElementById('previewMeta'),
+      paperFrame: document.getElementById('paperFrame'),
+      artSvg: document.getElementById('artSvg'),
+      printBtn: document.getElementById('printBtn'),
+      resetStartBtn: document.getElementById('resetStartBtn'),
+      toast: document.getElementById('toast')
+    };
+
+    let animationId = null;
+
+    function pageSize() {
+      return A4[state.orientation];
+    }
+
+    function pointLabel(index) {
+      if (index < 26) return String.fromCharCode(65 + index);
+      return 'P' + (index + 1);
+    }
+
+    function strokeWidthCm(widthLevel = state.lineWidth) {
+      return 0.025 + Number(widthLevel) * 0.014;
+    }
+
+    function safeNumber(value, fallback = 0) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function segmentDelta(segment) {
+      const length = Number(segment.length);
+      const angle = Number(segment.angle);
+      const rad = angle * Math.PI / 180;
+      if (segment.mode === 'full') {
+        return { dx: Math.cos(rad) * length, dy: -Math.sin(rad) * length };
+      }
+      const sign = segment.direction === 'below' ? 1 : -1;
+      return { dx: Math.cos(rad) * length, dy: sign * Math.sin(rad) * length };
+    }
+
+    function computePoints(customSegments = state.segments, customStart = state.start) {
+      const points = [{ x: customStart.x, y: customStart.y }];
+      let current = { x: customStart.x, y: customStart.y };
+      for (const seg of customSegments) {
+        const d = segmentDelta(seg);
+        current = { x: current.x + d.dx, y: current.y + d.dy };
+        points.push(current);
+      }
+      return points;
+    }
+
+    function computeLineItems(points = computePoints()) {
+      return state.segments.map((seg, i) => ({
+        segment: seg,
+        from: points[i],
+        to: points[i + 1],
+        index: i,
+        length: Math.hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y)
+      }));
+    }
+
+    function boundsForPoints(points) {
+      const xs = points.map(p => p.x);
+      const ys = points.map(p => p.y);
+      return {
+        minX: Math.min(...xs), maxX: Math.max(...xs),
+        minY: Math.min(...ys), maxY: Math.max(...ys),
+        w: Math.max(...xs) - Math.min(...xs),
+        h: Math.max(...ys) - Math.min(...ys)
+      };
+    }
+
+    function pointsOutside(points) {
+      const { w, h } = pageSize();
+      return points.filter(p => p.x < 0 || p.x > w || p.y < 0 || p.y > h).length;
+    }
+
+    function escapeXml(str = '') {
+      return String(str).replace(/[&<>'"]/g, ch => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&apos;', '"': '&quot;'
+      }[ch]));
+    }
+
+    function makeFilename(ext) {
+      const name = (state.studentName || 'student').trim().replace(/[^a-z0-9_-]+/gi, '_');
+      const title = (state.artTitle || 'protractor_path_art').trim().replace(/[^a-z0-9_-]+/gi, '_');
+      return `${name}_${title}.${ext}`.toLowerCase();
+    }
+
+    function buildGridSvg() {
+      if (!state.showGrid) return '';
+      const { w, h } = pageSize();
+      let out = '<g id="grid" stroke="#e8dfd0" stroke-width="0.01">';
+      for (let x = 1; x < w; x += 1) out += `<line x1="${x}" y1="0" x2="${x}" y2="${h}"/>`;
+      for (let y = 1; y < h; y += 1) out += `<line x1="0" y1="${y}" x2="${w}" y2="${y}"/>`;
+      out += '</g>';
+      return out;
+    }
+
+    function createSVGString(options = {}) {
+      const opts = {
+        showGrid: state.showGrid,
+        showLabels: state.showLabels,
+        showStepNumbers: state.showStepNumbers,
+        showStart: state.showStart,
+        includeMeta: true,
+        animatedLines: null,
+        pen: null,
+        ...options
+      };
+      const { w, h } = pageSize();
+      const points = computePoints();
+      const lines = opts.animatedLines || computeLineItems(points);
+      const bg = state.bgColor;
+      let svg = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+      svg += `<svg xmlns="http://www.w3.org/2000/svg" width="${w}cm" height="${h}cm" viewBox="0 0 ${w} ${h}">`;
+      svg += `<rect width="${w}" height="${h}" fill="${escapeXml(bg)}"/>`;
+      if (opts.showGrid) svg += buildGridSvg();
+      svg += `<rect x="0.15" y="0.15" width="${w - .3}" height="${h - .3}" fill="none" stroke="#334155" stroke-width="0.035"/>`;
+
+      if (opts.includeMeta) {
+        const title = escapeXml(state.artTitle || 'Untitled Path');
+        const name = escapeXml([state.studentName, state.studentClass].filter(Boolean).join(' · '));
+        svg += `<text x="0.65" y="0.85" font-family="Arial, sans-serif" font-size="0.34" fill="#65717f">${title}${name ? ' — ' + name : ''}</text>`;
+      }
+
+      svg += '<g id="art-lines" fill="none" stroke-linecap="round" stroke-linejoin="round">';
+      for (const item of lines) {
+        const seg = item.segment;
+        const color = escapeXml(seg.color || '#1f2933');
+        const sw = strokeWidthCm(seg.width || 2);
+        svg += `<line x1="${item.from.x.toFixed(3)}" y1="${item.from.y.toFixed(3)}" x2="${item.to.x.toFixed(3)}" y2="${item.to.y.toFixed(3)}" stroke="${color}" stroke-width="${sw.toFixed(3)}"/>`;
+      }
+      svg += '</g>';
+
+      if (opts.showStart && points.length) {
+        svg += `<circle cx="${points[0].x.toFixed(3)}" cy="${points[0].y.toFixed(3)}" r="0.13" fill="#9f6b4e" stroke="#fffdf7" stroke-width="0.05"/>`;
+      }
+
+      if (opts.showLabels || opts.showStepNumbers) {
+        svg += '<g id="labels" font-family="Arial, sans-serif" font-weight="700" fill="#334155">';
+        points.forEach((p, i) => {
+          if (opts.showLabels) {
+            svg += `<text x="${(p.x + 0.16).toFixed(3)}" y="${(p.y - 0.16).toFixed(3)}" font-size="0.28">${escapeXml(pointLabel(i))}</text>`;
+          }
+          if (opts.showStepNumbers && i > 0) {
+            const prev = points[i - 1];
+            const mx = (prev.x + p.x) / 2;
+            const my = (prev.y + p.y) / 2;
+            svg += `<circle cx="${mx.toFixed(3)}" cy="${my.toFixed(3)}" r="0.18" fill="#fffdf7" stroke="#334155" stroke-width="0.025"/>`;
+            svg += `<text x="${mx.toFixed(3)}" y="${(my + .09).toFixed(3)}" text-anchor="middle" font-size="0.20">${i}</text>`;
+          }
+        });
+        svg += '</g>';
+      }
+
+      if (opts.pen) {
+        svg += `<g class="pen-dot"><circle cx="${opts.pen.x.toFixed(3)}" cy="${opts.pen.y.toFixed(3)}" r="0.18" fill="#ffffff" stroke="#1f2933" stroke-width="0.06"/><circle class="sparkle" cx="${opts.pen.x.toFixed(3)}" cy="${opts.pen.y.toFixed(3)}" r="0.07" fill="#f2c94c"/></g>`;
+      }
+
+      svg += '</svg>';
+      return svg;
+    }
+
+    function render(options = {}) {
+      const { w, h } = pageSize();
+      els.paperFrame.classList.toggle('landscape', state.orientation === 'landscape');
+      const svg = createSVGString(options).replace(/^<\?xml[^>]*>\n?/, '');
+      els.artSvg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      els.artSvg.innerHTML = svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
+      updateUiStats();
+      renderHistory();
+      saveLocal();
+    }
+
+    function updateUiStats() {
+      const points = computePoints();
+      const outside = pointsOutside(points);
+      const total = state.segments.reduce((sum, s) => sum + Number(s.length || 0), 0);
+      const shortSegments = state.segments.filter(s => Number(s.length) < 2).length;
+      const progress = Math.min(100, (state.segments.length / MIN_LINES) * 100);
+
+      els.lineCount.textContent = state.segments.length;
+      els.totalCm.textContent = total.toFixed(1);
+      els.pointCount.textContent = points.length;
+      els.readyBadge.textContent = `${state.segments.length} / ${MIN_LINES}`;
+      els.progressBar.style.width = `${progress}%`;
+      els.previewTitle.textContent = state.artTitle || 'Untitled Path';
+      els.previewMeta.textContent = `${state.studentName || 'Student'}${state.studentClass ? ' · ' + state.studentClass : ''} · ${state.segments.length} line${state.segments.length === 1 ? '' : 's'}`;
+
+      els.statusBox.className = 'status-box';
+      if (state.segments.length < MIN_LINES) {
+        els.statusBox.classList.add('warn');
+        els.statusBox.textContent = `Needs ${MIN_LINES - state.segments.length} more line${MIN_LINES - state.segments.length === 1 ? '' : 's'}. Minimum required: ${MIN_LINES}.`;
+      } else if (outside > 0) {
+        els.statusBox.classList.add('bad');
+        els.statusBox.textContent = `${outside} point${outside === 1 ? ' is' : 's are'} outside the A4 page. Press Center Art or move the drawing.`;
+      } else if (shortSegments > 0) {
+        els.statusBox.classList.add('warn');
+        els.statusBox.textContent = `Complete, but ${shortSegments} line${shortSegments === 1 ? ' is' : 's are'} shorter than 2 cm. Check your teacher's minimum-length rule.`;
+      } else {
+        els.statusBox.classList.add('good');
+        els.statusBox.textContent = 'Ready to export. The artwork has at least 40 lines and fits on the page.';
+      }
+    }
+
+    function renderHistory() {
+      if (!state.segments.length) {
+        els.historyBody.innerHTML = '<tr><td colspan="6" style="color:#65717f;text-align:center;padding:14px">No lines yet.</td></tr>';
+        return;
+      }
+      els.historyBody.innerHTML = state.segments.map((s, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${Number(s.length).toFixed(1)}</td>
+          <td>${Number(s.angle).toFixed(0)}°</td>
+          <td>${s.mode === 'full' ? 'full' : s.direction}</td>
+          <td><span class="mini-color" style="background:${escapeXml(s.color)}"></span></td>
+          <td><button class="btn small bad" data-delete-step="${i}">×</button></td>
+        </tr>`).join('');
+    }
+
+    function addLine() {
+      const length = safeNumber(els.lengthInput.value, NaN);
+      const angle = safeNumber(els.angleInput.value, NaN);
+      if (!Number.isFinite(length) || length <= 0) return showToast('Enter a valid length in cm.');
+      const maxAngle = state.angleMode === 'full' ? 359 : 180;
+      if (!Number.isFinite(angle) || angle < 0 || angle > maxAngle) return showToast(`Angle must be from 0° to ${maxAngle}°.`);
+
+      state.segments.push({
+        length: Math.round(length * 10) / 10,
+        angle: Math.round(angle),
+        direction: els.directionInput.value,
+        mode: state.angleMode,
+        color: state.currentColor,
+        colorName: state.currentColorName,
+        width: Number(state.lineWidth)
+      });
+
+      els.lengthInput.value = '';
+      els.angleInput.value = '';
+      els.lengthInput.focus();
+      render();
+      showToast('Line added');
+    }
+
+    function undo() {
+      if (!state.segments.length) return showToast('Nothing to undo');
+      state.segments.pop();
+      render();
+      showToast('Undone');
+    }
+
+    function clearAll() {
+      if (!state.segments.length && !state.artTitle && !state.studentName) return;
+      if (!confirm('Clear the current artwork? This removes all lines.')) return;
+      state.segments = [];
+      const { w, h } = pageSize();
+      state.start = { x: w / 2, y: h / 2 };
+      render();
+      showToast('Cleared');
+    }
+
+    function centerArt() {
+      const points = computePoints();
+      if (!points.length) return;
+      const b = boundsForPoints(points);
+      const { w, h } = pageSize();
+      const dx = (w / 2) - (b.minX + b.w / 2);
+      const dy = (h / 2) - (b.minY + b.h / 2);
+      state.start.x += dx;
+      state.start.y += dy;
+      render();
+      showToast('Centered');
+    }
+
+    function resetStart() {
+      const { w, h } = pageSize();
+      state.start = { x: w / 2, y: h / 2 };
+      render();
+      showToast('Start reset');
+    }
+
+    function nudge(dir) {
+      const amount = 0.5;
+      if (dir === 'up') state.start.y -= amount;
+      if (dir === 'down') state.start.y += amount;
+      if (dir === 'left') state.start.x -= amount;
+      if (dir === 'right') state.start.x += amount;
+      render();
+    }
+
+    function animateRedraw() {
+      if (!state.segments.length) return showToast('Add lines first');
+      if (animationId) cancelAnimationFrame(animationId);
+      const points = computePoints();
+      const items = computeLineItems(points);
+      const totalLength = items.reduce((sum, item) => sum + item.length, 0);
+      const speedMap = { slow: 12, normal: 24, fast: 45 }; // cm per second
+      const speed = speedMap[els.animationSpeed.value] || 24;
+      const startTime = performance.now();
+
+      function frame(now) {
+        const elapsed = (now - startTime) / 1000;
+        let travel = elapsed * speed;
+        const animated = [];
+        let pen = points[0];
+
+        for (const item of items) {
+          if (travel >= item.length) {
+            animated.push(item);
+            travel -= item.length;
+            pen = item.to;
+          } else if (travel > 0) {
+            const t = travel / item.length;
+            const partialTo = {
+              x: item.from.x + (item.to.x - item.from.x) * t,
+              y: item.from.y + (item.to.y - item.from.y) * t
+            };
+            animated.push({ ...item, to: partialTo });
+            pen = partialTo;
+            break;
+          } else {
+            break;
+          }
+        }
+
+        render({ animatedLines: animated, pen, showLabels: false, showStepNumbers: false });
+
+        if (elapsed * speed < totalLength) {
+          animationId = requestAnimationFrame(frame);
+        } else {
+          animationId = null;
+          render();
+        }
+      }
+      animationId = requestAnimationFrame(frame);
+    }
+
+    function instructionText() {
+      const title = state.artTitle || 'Untitled Path';
+      const header = [
+        `Protractor Path Art: ${title}`,
+        `Student: ${state.studentName || ''}`,
+        `Class: ${state.studentClass || ''}`,
+        `Total lines: ${state.segments.length}`,
+        '',
+        'Instructions:',
+        'Start at point A. After each line, label the new point and continue from that point.',
+        ''
+      ];
+      const rows = state.segments.map((s, i) => {
+        const from = pointLabel(i);
+        const to = pointLabel(i + 1);
+        if (s.mode === 'full') {
+          return `${i + 1}. From ${from}, draw ${Number(s.length).toFixed(1)} cm at ${Number(s.angle).toFixed(0)}°. Label the new point ${to}.`;
+        }
+        return `${i + 1}. From ${from}, draw ${Number(s.length).toFixed(1)} cm at ${Number(s.angle).toFixed(0)}° ${s.direction.toUpperCase()} the horizontal helper line. Label the new point ${to}.`;
+      });
+      return header.concat(rows).join('\n');
+    }
+
+    function downloadBlob(content, filename, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function downloadSvg() {
+      downloadBlob(createSVGString(), makeFilename('svg'), 'image/svg+xml;charset=utf-8');
+    }
+
+    function downloadTxt() {
+      downloadBlob(instructionText(), makeFilename('txt'), 'text/plain;charset=utf-8');
+    }
+
+    function downloadJson() {
+      downloadBlob(JSON.stringify(state, null, 2), makeFilename('json'), 'application/json;charset=utf-8');
+    }
+
+    function downloadRaster(format) {
+      const { w, h } = pageSize();
+      const scale = 120;
+      const svgString = createSVGString();
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(w * scale);
+        canvas.height = Math.round(h * scale);
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = state.bgColor || '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const mime = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+        const ext = format === 'jpeg' ? 'jpg' : 'png';
+        canvas.toBlob(blob => {
+          if (!blob) return showToast('Export failed');
+          const outUrl = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = outUrl;
+          a.download = makeFilename(ext);
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(outUrl), 1000);
+        }, mime, 0.95);
+        URL.revokeObjectURL(url);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        showToast('Image export failed');
+      };
+      img.src = url;
+    }
+
+    async function copyInstructions() {
+      try {
+        await navigator.clipboard.writeText(instructionText());
+        showToast('Steps copied');
+      } catch (e) {
+        showToast('Copy failed');
+      }
+    }
+
+    function saveLocal() {
+      try { localStorage.setItem('protractorPathArtV1', JSON.stringify(state)); } catch (e) {}
+    }
+
+    function loadLocal() {
+      try {
+        const raw = localStorage.getItem('protractorPathArtV1');
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        Object.assign(state, saved);
+      } catch (e) {}
+    }
+
+    function syncInputsFromState() {
+      els.studentName.value = state.studentName || '';
+      els.studentClass.value = state.studentClass || '';
+      els.artTitle.value = state.artTitle || '';
+      els.angleMode.value = state.angleMode || 'classroom';
+      els.directionWrap.style.display = state.angleMode === 'full' ? 'none' : 'block';
+      els.angleInput.max = state.angleMode === 'full' ? '359' : '180';
+      els.lineWidth.value = String(state.lineWidth || 2);
+      els.bgColor.value = state.bgColor || '#fffdf7';
+      els.showGrid.checked = !!state.showGrid;
+      els.showLabels.checked = !!state.showLabels;
+      els.showStepNumbers.checked = !!state.showStepNumbers;
+      els.showStart.checked = !!state.showStart;
+      els.orientation.value = state.orientation || 'portrait';
+      els.currentColorLabel.textContent = state.currentColorName || 'Ink';
+    }
+
+    function showToast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add('show');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => els.toast.classList.remove('show'), 1500);
+    }
+
+    function bindEvents() {
+      els.addLineBtn.addEventListener('click', addLine);
+      [els.lengthInput, els.angleInput].forEach(input => {
+        input.addEventListener('keydown', e => {
+          if (e.key === 'Enter') addLine();
+        });
+      });
+
+      els.undoBtn.addEventListener('click', undo);
+      els.clearBtn.addEventListener('click', clearAll);
+      els.centerBtn.addEventListener('click', centerArt);
+      els.animateBtn.addEventListener('click', animateRedraw);
+      els.resetStartBtn.addEventListener('click', resetStart);
+      els.printBtn.addEventListener('click', () => window.print());
+
+      document.querySelectorAll('[data-nudge]').forEach(btn => {
+        btn.addEventListener('click', () => nudge(btn.dataset.nudge));
+      });
+
+      els.studentName.addEventListener('input', () => { state.studentName = els.studentName.value; render(); });
+      els.studentClass.addEventListener('input', () => { state.studentClass = els.studentClass.value; render(); });
+      els.artTitle.addEventListener('input', () => { state.artTitle = els.artTitle.value; render(); });
+
+      els.angleMode.addEventListener('change', () => {
+        state.angleMode = els.angleMode.value;
+        els.directionWrap.style.display = state.angleMode === 'full' ? 'none' : 'block';
+        els.angleInput.max = state.angleMode === 'full' ? '359' : '180';
+        render();
+      });
+
+      els.lineWidth.addEventListener('change', () => { state.lineWidth = Number(els.lineWidth.value); saveLocal(); });
+      els.bgColor.addEventListener('change', () => { state.bgColor = els.bgColor.value; render(); });
+
+      els.showGrid.addEventListener('change', () => { state.showGrid = els.showGrid.checked; render(); });
+      els.showLabels.addEventListener('change', () => { state.showLabels = els.showLabels.checked; render(); });
+      els.showStepNumbers.addEventListener('change', () => { state.showStepNumbers = els.showStepNumbers.checked; render(); });
+      els.showStart.addEventListener('change', () => { state.showStart = els.showStart.checked; render(); });
+
+      els.orientation.addEventListener('change', () => {
+        const old = pageSize();
+        state.orientation = els.orientation.value;
+        const now = pageSize();
+        state.start.x += (now.w - old.w) / 2;
+        state.start.y += (now.h - old.h) / 2;
+        centerArt();
+      });
+
+      els.historyBody.addEventListener('click', e => {
+        const btn = e.target.closest('[data-delete-step]');
+        if (!btn) return;
+        const index = Number(btn.dataset.deleteStep);
+        state.segments.splice(index, 1);
+        render();
+        showToast('Line deleted');
+      });
+
+      els.downloadSvgBtn.addEventListener('click', downloadSvg);
+      els.downloadPngBtn.addEventListener('click', () => downloadRaster('png'));
+      els.downloadJpegBtn.addEventListener('click', () => downloadRaster('jpeg'));
+      els.downloadTxtBtn.addEventListener('click', downloadTxt);
+      els.downloadJsonBtn.addEventListener('click', downloadJson);
+      els.copyTxtBtn.addEventListener('click', copyInstructions);
+    }
+
+    function initPalette() {
+      els.palette.innerHTML = palette.map(c => `<button class="swatch" title="${escapeXml(c.name)}" data-color="${escapeXml(c.value)}" data-name="${escapeXml(c.name)}" style="background:${escapeXml(c.value)}"></button>`).join('');
+      els.palette.addEventListener('click', e => {
+        const swatch = e.target.closest('.swatch');
+        if (!swatch) return;
+        state.currentColor = swatch.dataset.color;
+        state.currentColorName = swatch.dataset.name;
+        els.currentColorLabel.textContent = state.currentColorName;
+        document.querySelectorAll('.swatch').forEach(s => s.classList.toggle('selected', s.dataset.color === state.currentColor));
+        saveLocal();
+      });
+      document.querySelectorAll('.swatch').forEach(s => s.classList.toggle('selected', s.dataset.color === state.currentColor));
+    }
+
+    function init() {
+      loadLocal();
+      syncInputsFromState();
+      initPalette();
+      bindEvents();
+      render();
+      els.lengthInput.focus();
+    }
+
+    init();
+  </script>
+</body>
+</html>
